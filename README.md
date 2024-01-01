@@ -9,3 +9,10 @@ python -m pip install Django
 
 start the Django development server:
 python manage.py runserver
+
+https://dashboard.ngrok.com/get-started/setup/windows
+
+authtoken:
+ngrok config add-authtoken 2aM39xGHsw7jKJTYDUBqJU62Vk2_wM9aKoDu9k3uvQjAyajh
+
+
