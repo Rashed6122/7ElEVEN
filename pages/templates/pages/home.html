@@ -1,0 +1,187 @@
+<!-- pages/templates/pages/home.html -->
+{% extends "base.html" %}
+{% load static %}
+{%csrf_token%}
+{% block page_content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Capture and Upload Page</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #576d6d;
+        }
+
+        #photoContainer {
+            text-align: left;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            background-color: #d9e7e7;
+            margin-bottom: 20px; 
+            position: relative; /* Make the container position relative */
+        }
+        #photoContainer h1 {
+            text-align: center;
+        }
+        #photo {
+            max-width: 150%;
+            max-height: 250px;
+            margin: 0 auto;
+            display: none;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        #circle {
+            width: 20px;
+            height: 20px;
+            background-color: rgb(162, 16, 16);
+            border-radius: 50%;
+            position: absolute;
+            top: 38%; /* Adjust the positioning to center the circle relative to the container */
+            left: 17%;
+            transition: all 0.5s ease;
+        }
+        #submitButton {
+            background-color: #2d8282;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }        
+    </style>
+</head>
+<body>
+    <div id="photoContainer">
+      <h1 id="header1">Insta Cart</h1>
+      <div id="circle" style="display: none;"></div>
+      <img id="photo" style="display: none;" src="{% static '7ELEVEN.jpg' %}">
+      <div>
+      <input type="checkbox" id="Snaks">
+      <label for="Snaks">Snaks</label>
+      </div> 
+      <div>    
+      <input type="checkbox" id="Hot Food">
+      <label for="Hot Food">Hot Food</label>
+      </div>
+      <div>
+      <input type="checkbox" id="Bakery">
+      <label for="Bakery">Bakery</label>
+      </div>
+      <div>
+      <input type="checkbox" id="Coffe/Hot Drinks">
+      <label for="Coffe/Hot Drinks">Coffe/Hot Drinks</label>
+      </div>
+      <div>
+      <input type="checkbox" id="Fresh and Chilled Food">
+      <label for="Fresh and Chilled Food">Fresh and Chilled Food</label>
+      </div>
+      <div>
+      <input type="checkbox" id="Accessories/Headwear">
+      <label for="Accessories/Headwear">Accessories/Headwear</label>
+      </div>
+      <div>
+      <input type="checkbox" id="Shirts">
+      <label for="Shirts">Shirts</label>
+      </div>
+      <div>
+      <input type="checkbox" id="Outerware">
+      <label for="Outerware">Outerware</label>
+      </div>
+      <div>
+      <input type="checkbox" id="Novels/Magazzine">
+      <label for="Novels/Magazzine">Novels/Magazzine</label>
+      </div>
+      <div>
+      <input type="checkbox" id="Energy Drinks/Wine/Beer">
+      <label for="Energy Drinks/Wine/Beer">Energy Drinks/Wine/Beer</label>
+      </div>
+      <div>
+      <input type="checkbox" id="Cold Pressed Juice/Water">
+      <label for="Cold Pressed Juice/Water">Cold Pressed Juice/Water</label>
+      </div>
+      <div>
+      <input type="checkbox" id="ATM">
+      <label for="ATM">ATM</label>
+      </div>
+      <button id="submitButton" onclick="handleSubmit()">Submit</button>
+    </div>
+    <script>
+        function handleSubmit() {
+          var checkboxes = document.querySelectorAll('#photoContainer input[type="checkbox"]');
+          var checkedCheckboxes = [];
+          // Iterate over each checkbox
+          checkboxes.forEach(function(checkbox) {
+            var label = document.querySelector('label[for="' + checkbox.id + '"]');
+            checkbox.style.display = 'none';
+            if (label) {
+                label.style.display = 'none';
+            }
+              // Check if the checkbox is checked
+              if (checkbox.checked) {
+                  // Append the ID to the array
+                  checkedCheckboxes.push(checkbox.id);     
+              }
+              document.getElementById("photo").style.display='block';
+              document.getElementById("circle").style.display='block';
+              document.getElementById("submitButton").textContent = 'Again';
+          });
+          sendToBackend(checkedCheckboxes);
+      }
+      function sendToBackend(data) {
+        // Replace '/your-backend-endpoint' with the actual endpoint URL in your Django app
+        let top = [38,43,43,43,43,43,56,56,56,58,58,65,26,27]
+        let left = [17,25,32,39,47,54,25,32,39,47,59,31,55,24]
+        let marketList = ['Start','Snaks','Hot Food','Bakery','Coffe/Hot Drinks','Fresh and Chilled Food','Accessories/Headwear','Shirts','Outerware','Novels/Magazzine','Energy Drinks/Wine/Beer','Cold Pressed Juice/Water','ATM','Cashier']
+
+        var endpoint = '/map';
+
+        // Make a POST request using fetch
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Include any additional headers if needed
+            },
+            body: JSON.stringify({ checkedCheckboxes: data }),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+               // Access the 'result' array
+               const resultArray = data.result;
+               function moveObject(targetY, targetX) {
+                document.getElementById('circle').style.top = targetY +'%';
+                document.getElementById('circle').style.left = targetX +'%';
+               }
+               const interval = 1000;
+               for (let i = 0; i < resultArray.length ; i++) {
+                setTimeout(function() {
+                    moveObject(top[resultArray[i]],left[resultArray[i]]);
+                    document.getElementById("header1").textContent = marketList[resultArray[i]] ;
+                },  i * interval);
+               }   
+            })
+            .catch(error => {
+                // Handle errors during the fetch
+                console.error('Error sending data to the backend', error);
+            });
+        }
+    </script>
+</body>
+</html>
+{% endblock page_content %}
